@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   ShieldCheck,
+  ShieldAlert,
   Search,
   ExternalLink,
   Upload,
@@ -143,7 +144,22 @@ export default function DashboardPage() {
       role_title: 'Chief Executive Officer (CEO)',
       department: 'Executive Leadership',
       badge_color: '#8b5cf6',
-      badgeText: 'Executive'
+      badgeText: 'Executive',
+      permissions: {
+        canViewDashboard: true,
+        canViewColleges: true,
+        canUploadCsv: false,
+        canEditTemplates: false,
+        canViewTemplates: true,
+        canTestSend: true,
+        canLaunchCampaign: false,
+        canPauseKillCampaign: true,
+        canManageSmtp: false,
+        canViewReports: true,
+        canExportExcel: true,
+        canManageUsers: false,
+        badgeText: 'Executive'
+      }
     },
     {
       role: 'tech_lead',
@@ -153,7 +169,22 @@ export default function DashboardPage() {
       role_title: 'Lead Systems & Infrastructure Architect',
       department: 'Engineering & DevSecOps',
       badge_color: '#0284c7',
-      badgeText: 'Infrastructure'
+      badgeText: 'Infrastructure',
+      permissions: {
+        canViewDashboard: true,
+        canViewColleges: true,
+        canUploadCsv: false,
+        canEditTemplates: false,
+        canViewTemplates: true,
+        canTestSend: true,
+        canLaunchCampaign: false,
+        canPauseKillCampaign: true,
+        canManageSmtp: true,
+        canViewReports: true,
+        canExportExcel: true,
+        canManageUsers: false,
+        badgeText: 'Infrastructure'
+      }
     },
     {
       role: 'product_manager',
@@ -163,7 +194,22 @@ export default function DashboardPage() {
       role_title: 'Product & Outreach Growth Manager',
       department: 'Collegiate Partnerships',
       badge_color: '#10b981',
-      badgeText: 'Outreach Manager'
+      badgeText: 'Outreach Manager',
+      permissions: {
+        canViewDashboard: true,
+        canViewColleges: true,
+        canUploadCsv: true,
+        canEditTemplates: true,
+        canViewTemplates: true,
+        canTestSend: true,
+        canLaunchCampaign: true,
+        canPauseKillCampaign: true,
+        canManageSmtp: false,
+        canViewReports: true,
+        canExportExcel: true,
+        canManageUsers: false,
+        badgeText: 'Outreach Manager'
+      }
     },
     {
       role: 'general_admin',
@@ -173,13 +219,31 @@ export default function DashboardPage() {
       role_title: 'Lead Outreach Administrator',
       department: 'Global Administration',
       badge_color: '#e11d48',
-      badgeText: 'Super Admin'
+      badgeText: 'Super Admin',
+      permissions: {
+        canViewDashboard: true,
+        canViewColleges: true,
+        canUploadCsv: true,
+        canEditTemplates: true,
+        canViewTemplates: true,
+        canTestSend: true,
+        canLaunchCampaign: true,
+        canPauseKillCampaign: true,
+        canManageSmtp: true,
+        canViewReports: true,
+        canExportExcel: true,
+        canManageUsers: true,
+        badgeText: 'Super Admin'
+      }
     }
   ];
 
   const handleSwitchRole = (targetRole) => {
     const roleDef = RBAC_ROLES.find(r => r.role === targetRole) || RBAC_ROLES[3];
     setCurrentUserRole(roleDef.role);
+    if (roleDef.permissions) {
+      setUserPermissions(roleDef.permissions);
+    }
     const updated = {
       name: roleDef.name,
       email: roleDef.email,
@@ -198,7 +262,8 @@ export default function DashboardPage() {
       localStorage.setItem('sf_auth_session', JSON.stringify({
         ...curr,
         ...updated,
-        role: roleDef.role
+        role: roleDef.role,
+        permissions: roleDef.permissions
       }));
     }
     addToast('success', 'RBAC Role Switched', `Active session switched to ${roleDef.role_title}.`);

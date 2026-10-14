@@ -3,7 +3,7 @@ import time
 import shutil
 from playwright.sync_api import sync_playwright
 
-BASE_URL = os.environ.get("BASE_URL", "https://shortfundly-ea.vercel.app")
+BASE_URL = os.environ.get("BASE_URL", "http://localhost:3000")
 RECORDINGS_DIR = os.path.join(os.getcwd(), "recordings")
 PUBLIC_VIDEOS_DIR = os.path.join(os.getcwd(), "public", "videos")
 ARTIFACT_DIR = r"C:\Users\ipsha\.gemini\antigravity\brain\44df5a77-4d85-4065-ad06-9daeab12b969"
@@ -333,24 +333,77 @@ def main():
         time.sleep(1.0)
 
         # -------------------------------------------------------------
-        # SCENE 9: DASHBOARD TAB 5 - SMTP CONFIG & RELAYS
+        # SCENE 9: DASHBOARD TAB 5 - SMTP CONFIG, LIVE DISPATCH & INBOX VERIFICATION
         # -------------------------------------------------------------
-        print("Scene 9: Dashboard Tab 5 (SMTP Accounts & Relays)...")
+        print("Scene 9: Dashboard Tab 5 (SMTP Accounts, Live Transmission & Handshake)...")
         tab_smtp = page.locator("button:has-text('SMTP Vault')").first
         tab_smtp.hover()
         time.sleep(0.4)
         tab_smtp.click()
         time.sleep(2.0)
 
-        smooth_scroll(page, 400, steps=20, delay=0.03)
+        # Scroll down to showcase active SMTP relay and test controls
+        smooth_scroll(page, 550, steps=25, delay=0.03)
         time.sleep(1.5)
-        smooth_scroll(page, 0, steps=20, delay=0.03)
-        time.sleep(1.0)
+
+        # Click Test Handshake on the active relay
+        test_handshake_btn = page.locator("button:has-text('Test Active Relay'), button:has-text('Test Handshake')").first
+        if test_handshake_btn.count() > 0:
+            print("  - Testing live SMTP handshake connection to Google Relay (smtp.gmail.com:587)...")
+            test_handshake_btn.hover()
+            time.sleep(0.4)
+            test_handshake_btn.click()
+            time.sleep(2.5) # Wait for round-trip ping
+
+        # Click "Send Live Test Mail to Monarchs University"
+        monarch_send_btn = page.locator("#btn-monarch-live-send, button:has-text('Send Live Test Mail')").first
+        if monarch_send_btn.count() > 0:
+            print("  - Dispatching live academic proposal to Monarchs University (monarchrealms.team@gmail.com)...")
+            monarch_send_btn.hover()
+            time.sleep(0.4)
+            monarch_send_btn.click()
+            time.sleep(3.0) # Wait for live SMTP dispatch & toast notification
+
+        # Open Recipient Inbox via button
+        open_inbox_btn = page.locator("a[href='/inbox'] button, a[href='/inbox'], button:has-text('Open Gmail Inbox')").first
+        if open_inbox_btn.count() > 0:
+            print("  - Opening recipient Gmail inbox for Profile: monarchrealms.team@gmail.com...")
+            open_inbox_btn.hover()
+            time.sleep(0.5)
+            open_inbox_btn.click()
+            page.wait_for_url("**/inbox", timeout=12000)
+            time.sleep(2.0)
+            inject_cursor(page)
+
+            print("Scene 10: Inspecting Received Email in Gmail Workspace (monarchrealms.team@gmail.com)...")
+            smooth_scroll(page, 200, steps=15, delay=0.03)
+            time.sleep(1.2)
+
+            # Click unread email to expand and read
+            email_row = page.locator("#inbox-email-row, div:has-text('Shortfundly Education Outreach')").first
+            email_row.hover()
+            time.sleep(0.5)
+            email_row.click()
+            time.sleep(2.5) # Wait for email view animation
+
+            # Scroll through received proposal
+            smooth_scroll(page, 550, steps=25, delay=0.03)
+            time.sleep(2.5)
+            smooth_scroll(page, 0, steps=20, delay=0.03)
+            time.sleep(1.2)
+
+            # Return back to Shortfundly Deck
+            back_btn = page.locator("a[href='/dashboard'] button, a[href='/dashboard']").first
+            back_btn.hover()
+            time.sleep(0.4)
+            back_btn.click()
+            page.wait_for_url("**/dashboard", timeout=12000)
+            time.sleep(2.0)
 
         # -------------------------------------------------------------
-        # SCENE 10: RETURN TO OVERVIEW DASHBOARD
+        # SCENE 11: RETURN TO CENTRAL TELEMETRY OVERVIEW
         # -------------------------------------------------------------
-        print("Scene 10: Returning to Overview Dashboard...")
+        print("Scene 11: Returning to Central Telemetry Deck...")
         tab_dash = page.locator("button:has-text('Dashboard')").first
         tab_dash.hover()
         time.sleep(0.4)

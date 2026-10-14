@@ -12,6 +12,8 @@ yarn-error.log*
 /tests
 outbox_preview/
 /recordings/
+monarch_chrome_profile/
+*.png
 __pycache__/
 *.py[cod]
 *$py.class

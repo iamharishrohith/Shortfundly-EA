@@ -3022,6 +3022,76 @@ export default function DashboardPage() {
                       <li>Click <strong>"Test Handshake"</strong> to verify before launching live email dispatches.</li>
                     </ol>
                   </div>
+
+                  {/* Live Recipient Dispatch & Inbox Inspector */}
+                  <div style={{
+                    marginTop: '16px',
+                    padding: '16px',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid #bbf7d0',
+                    background: '#f0fdf4'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <CheckCircle2 size={16} style={{ color: '#16a34a' }} />
+                        <strong style={{ fontSize: '13px', color: '#14532d' }}>Live Transmission & Recipient Inbox Verification</strong>
+                      </div>
+                      <Link href="/inbox" style={{ textDecoration: 'none' }}>
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          style={{ fontSize: '11px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        >
+                          <Mail size={13} />
+                          <span>Open Gmail Inbox (monarchrealms.team@gmail.com)</span>
+                          <ExternalLink size={12} />
+                        </button>
+                      </Link>
+                    </div>
+                    <p style={{ fontSize: '12px', color: '#166534', margin: '0 0 12px 0', lineHeight: 1.5 }}>
+                      Test target: <strong>Monarchs University</strong> &bull; Contact: <strong>Harish Rohith</strong> &bull; Email: <code>monarchrealms.team@gmail.com</code>.
+                      Verified delivery route through authenticated relay <code>smtp.gmail.com:587</code>.
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <button
+                        type="button"
+                        id="btn-monarch-live-send"
+                        onClick={async () => {
+                          addToast('info', 'Dispatching', 'Sending live proposal to monarchrealms.team@gmail.com...');
+                          try {
+                            const res = await fetch('/api/campaign/single-send', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                college: {
+                                  college_name: 'Monarchs University',
+                                  official_email: 'monarchrealms.team@gmail.com',
+                                  contact_person: 'Harish Rohith',
+                                  city: 'Mumbai',
+                                  state: 'Maharashtra'
+                                },
+                                liveMode: true
+                              })
+                            });
+                            const data = await res.json();
+                            if (res.ok && data.success) {
+                              addToast('success', 'Email Sent Live', `Message delivered to monarchrealms.team@gmail.com! ID: ${data.messageId}`);
+                              appendLog(`LIVE SMTP SUCCESS: Dispatched proposal to Monarchs University (${data.messageId})`);
+                            } else {
+                              addToast('error', 'Dispatch Error', data.error || 'Failed to send');
+                            }
+                          } catch (err) {
+                            addToast('error', 'Network Error', err.message);
+                          }
+                        }}
+                        className="btn btn-live-smtp"
+                        style={{ padding: '7px 16px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                      >
+                        <Send size={13} />
+                        <span>Send Live Test Mail to Monarchs University</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

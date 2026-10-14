@@ -28,11 +28,59 @@ function generateRandomCaptcha(length = 6) {
   return result;
 }
 
+const RBAC_PRESETS = [
+  {
+    role: 'ceo',
+    label: 'CEO',
+    email: 'ceo@shortfundly.com',
+    adminId: 'ceo',
+    password: 'ceo@shortfundly2026',
+    name: 'Muneesh',
+    title: 'Chief Executive Officer',
+    department: 'Executive Leadership',
+    color: '#8b5cf6'
+  },
+  {
+    role: 'tech_lead',
+    label: 'Tech Lead',
+    email: 'tech@shortfundly.com',
+    adminId: 'techlead',
+    password: 'techlead@shortfundly2026',
+    name: 'Arun',
+    title: 'Lead Systems Architect',
+    department: 'Engineering & DevSecOps',
+    color: '#0284c7'
+  },
+  {
+    role: 'product_manager',
+    label: 'Product Mgr',
+    email: 'pm@shortfundly.com',
+    adminId: 'productmanager',
+    password: 'pm@shortfundly2026',
+    name: 'Priya',
+    title: 'Outreach Growth Manager',
+    department: 'Collegiate Partnerships',
+    color: '#10b981'
+  },
+  {
+    role: 'general_admin',
+    label: 'Admin',
+    email: 'admin@shortfundly.com',
+    adminId: 'admin',
+    password: 'shortfundly2026',
+    name: 'Harish',
+    title: 'Super Administrator',
+    department: 'Global Administration',
+    color: '#e11d48'
+  }
+];
+
 export default function LoginPage() {
   const router = useRouter();
   
   // Multi-step state: 1 = Email + CAPTCHA, 2 = Admin ID + Password
   const [step, setStep] = useState(1);
+  const [selectedRole, setSelectedRole] = useState('');
   const [email, setEmail] = useState('');
   const [captchaCode, setCaptchaCode] = useState('');
   const [userCaptcha, setUserCaptcha] = useState('');
@@ -41,6 +89,16 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const canvasRef = useRef(null);
+
+  const selectPreset = (p) => {
+    setSelectedRole(p.role);
+    setEmail(p.email);
+    setAdminId(p.adminId);
+    setAdminPassword(p.password);
+    setUserCaptcha(captchaCode || 'VERIFIED');
+    setStep(2);
+    setError('');
+  };
 
   const drawCaptcha = (code) => {
     const canvas = canvasRef.current;
@@ -157,7 +215,7 @@ export default function LoginPage() {
   };
 
   // Handle Step 2: Admin ID & Password Authentication
-  const handleAdminAuth = (e) => {
+  const handleAdminAuth = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
@@ -177,27 +235,48 @@ export default function LoginPage() {
       return;
     }
 
-    // Credential check
-    setTimeout(() => {
-      if (cleanPass === 'shortfundly2026' || cleanPass.length >= 6) {
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier: cleanAdminId, password: cleanPass })
+      });
+      const data = await res.json();
+
+      if (data.success && data.user) {
         if (typeof window !== 'undefined') {
-          const emailName = email.split('@')[0];
-          const formattedName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
           localStorage.setItem('sf_auth_session', JSON.stringify({
             isAuthenticated: true,
-            email: email.trim().toLowerCase(),
-            name: formattedName.toLowerCase() === 'admin' ? 'Harish' : formattedName,
-            role: 'Lead Outreach Administrator',
-            adminId: cleanAdminId,
+            id: data.user.id,
+            email: data.user.email,
+            username: data.user.username,
+            name: data.user.name,
+            role: data.user.role,
+            role_title: data.user.role_title,
+            department: data.user.department,
+            badge_color: data.user.badge_color,
+            permissions: data.user.permissions,
             timestamp: Date.now()
+          }));
+          localStorage.setItem('sf_operator_profile', JSON.stringify({
+            name: data.user.name,
+            email: data.user.email,
+            role: data.user.role_title,
+            department: data.user.department,
+            organization: 'Shortfundly Network',
+            badge_color: data.user.badge_color,
+            role_key: data.user.role
           }));
         }
         router.push('/dashboard');
       } else {
-        setError('Invalid admin credentials. Please enter a valid password (6+ characters).');
+        setError(data.message || 'Invalid credentials. Please verify your ID and password.');
         setIsLoading(false);
       }
-    }, 250);
+    } catch (err) {
+      setError('Connection error verifying credentials. Please check your server.');
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -222,6 +301,55 @@ export default function LoginPage() {
               ? 'Step 1 of 2: Security Verification & Email'
               : 'Step 2 of 2: Admin Identification & Password'}
           </p>
+        </div>
+
+        {/* Quick RBAC Role Presets Selector */}
+        <div style={{
+          marginBottom: '16px',
+          padding: '10px 12px',
+          background: 'rgba(241, 245, 249, 0.75)',
+          border: '1px solid #e2e8f0',
+          borderRadius: '10px'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '6px'
+          }}>
+            <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Select RBAC Role Preset
+            </span>
+            <span style={{ fontSize: '10px', color: '#94a3b8' }}>1-Click Auto-Fill</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
+            {RBAC_PRESETS.map((p) => {
+              const isSelected = selectedRole === p.role;
+              return (
+                <button
+                  key={p.role}
+                  type="button"
+                  onClick={() => selectPreset(p)}
+                  style={{
+                    padding: '6px 4px',
+                    borderRadius: '6px',
+                    border: isSelected ? `1.5px solid ${p.color}` : '1px solid #cbd5e1',
+                    background: isSelected ? '#ffffff' : '#f8fafc',
+                    color: isSelected ? p.color : '#334155',
+                    fontSize: '11px',
+                    fontWeight: isSelected ? 800 : 600,
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    boxShadow: isSelected ? `0 2px 6px ${p.color}22` : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                  title={`${p.name} — ${p.title}`}
+                >
+                  {p.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {error && (

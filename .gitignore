@@ -42,3 +42,8 @@ Thumbs.db
 .vscode/
 .idea/
 ~$*
+credentials_and_env.txt
+*.docx
+scripts/test_*.py
+scripts/check_*.py
+scripts/create_full_word_doc.py

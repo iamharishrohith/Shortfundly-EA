@@ -1,4 +1,5 @@
-﻿const { db } = require("./lib/db");
+﻿const path = require("path");
+const { db } = require(path.join(__dirname, "../lib/db"));
 const c = db.prepare("SELECT user, pass, host, port, secure, from_email, from_name FROM smtp_config WHERE id = 1").get();
 const fs = require("fs");
 
@@ -93,6 +94,7 @@ const lines = [
   ""
 ];
 
-fs.writeFileSync("credentials_and_env.txt", lines.join("\n"), "utf8");
-fs.writeFileSync(".env.example", lines.join("\n"), "utf8");
+const rootDir = path.join(__dirname, "..");
+fs.writeFileSync(path.join(rootDir, "credentials_and_env.txt"), lines.join("\n"), "utf8");
+fs.writeFileSync(path.join(rootDir, ".env.example"), lines.join("\n"), "utf8");
 console.log("Successfully created credentials_and_env.txt and .env.example");

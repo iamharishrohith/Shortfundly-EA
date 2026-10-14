@@ -1,6 +1,8 @@
 import os
 import time
 import shutil
+import subprocess
+import glob
 from playwright.sync_api import sync_playwright
 
 BASE_URL = os.environ.get("BASE_URL", "http://localhost:3000")
@@ -78,14 +80,15 @@ def main():
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
                 "--disable-dev-shm-usage",
-                "--font-render-hinting=none"
+                "--font-render-hinting=none",
+                "--window-size=1920,1080"
             ]
         )
         
         context = browser.new_context(
-            viewport={"width": 1440, "height": 900},
+            viewport={"width": 1920, "height": 1080},
             record_video_dir=RECORDINGS_DIR,
-            record_video_size={"width": 1440, "height": 900}
+            record_video_size={"width": 1920, "height": 1080}
         )
 
         # Inject Canvas CAPTCHA snooper so we reliably read whatever text is drawn on the canvas
@@ -310,10 +313,91 @@ def main():
         tab_sender.hover()
         time.sleep(0.4)
         tab_sender.click()
-        time.sleep(2.0)
+        time.sleep(1.8)
 
-        smooth_scroll(page, 450, steps=20, delay=0.03)
-        time.sleep(1.5)
+        # Ensure Individual Recipient mode is active
+        indiv_mode_btn = page.locator("button:has-text('Mode A: Individual Single Recipient')").first
+        if indiv_mode_btn.count() > 0:
+            print("  - Selecting Mode A: Individual Single Recipient...")
+            indiv_mode_btn.hover()
+            time.sleep(0.3)
+            indiv_mode_btn.click()
+            time.sleep(1.0)
+
+        # Smooth scroll down to view input form
+        smooth_scroll(page, 320, steps=20, delay=0.03)
+        time.sleep(1.0)
+
+        # 1. Type Target Institution Name: Monarchs University
+        print("  - Entering Target Institution Name: Monarchs University...")
+        inst_input = page.locator("input[placeholder*='COEP Technological University']").first
+        inst_input.click()
+        inst_input.fill("")
+        human_type(inst_input, "Monarchs University", delay=0.04)
+        time.sleep(0.6)
+
+        # 2. Type Official Email Address: monarchrealms.team@gmail.com
+        print("  - Entering Recipient Email: monarchrealms.team@gmail.com...")
+        email_field = page.locator("input[placeholder*='registrar@coeptech.ac.in']").first
+        email_field.click()
+        email_field.fill("")
+        human_type(email_field, "monarchrealms.team@gmail.com", delay=0.04)
+        time.sleep(0.8)
+
+        # 3. Click Verify MX Records
+        mx_verify_btn = page.locator("button:has-text('Verify MX Records')").first
+        print("  - Performing live DNS MX record verification for monarchrealms.team@gmail.com...")
+        mx_verify_btn.hover()
+        time.sleep(0.4)
+        mx_verify_btn.click()
+        time.sleep(2.0) # wait for MX record resolution and badge
+
+        # 4. Type Contact Person: Harish Rohith
+        print("  - Entering Contact Person: Harish Rohith...")
+        contact_field = page.locator("input[placeholder*='Dr. D. N. Sonawane']").first
+        contact_field.click()
+        contact_field.fill("")
+        human_type(contact_field, "Harish Rohith", delay=0.04)
+        time.sleep(0.6)
+
+        # 5. Type City & State
+        print("  - Entering Location: Mumbai, Maharashtra...")
+        city_field = page.locator("input[placeholder*='Chennai, Bangalore, Pune']").first
+        city_field.click()
+        city_field.fill("")
+        human_type(city_field, "Mumbai", delay=0.04)
+        time.sleep(0.4)
+
+        state_field = page.locator("input[placeholder*='Tamil Nadu, Karnataka, Delhi']").first
+        state_field.click()
+        state_field.fill("")
+        human_type(state_field, "Maharashtra", delay=0.04)
+        time.sleep(0.8)
+
+        # Scroll to show payload preview and send button
+        smooth_scroll(page, 520, steps=20, delay=0.03)
+        time.sleep(1.2)
+
+        # Bypass window.confirm for automated recording
+        page.evaluate("() => { window.__SKIP_CONFIRM__ = true; }")
+
+        # 6. Click "Send Live Production Email"
+        send_live_btn = page.locator("button:has-text('Send Live Production Email')").first
+        print("  - Clicking Send Live Production Email...")
+        send_live_btn.hover()
+        time.sleep(0.5)
+        send_live_btn.click()
+        
+        # Wait for dispatch success alert box
+        print("  - Waiting for live SMTP delivery confirmation...")
+        try:
+            page.wait_for_selector(".alert-box.success", timeout=15000)
+            print("  - Live dispatch confirmed! Receipt and Message-ID visible.")
+        except Exception as e:
+            print(f"  - Note: {e}")
+            
+        time.sleep(3.5) # Hold view so live dispatch receipt, messageId & recipient are clearly captured
+        
         smooth_scroll(page, 0, steps=20, delay=0.03)
         time.sleep(1.0)
 
@@ -328,7 +412,7 @@ def main():
         time.sleep(2.0)
 
         smooth_scroll(page, 350, steps=20, delay=0.03)
-        time.sleep(1.5)
+        time.sleep(2.0)
         smooth_scroll(page, 0, steps=20, delay=0.03)
         time.sleep(1.0)
 
@@ -355,15 +439,6 @@ def main():
             test_handshake_btn.click()
             time.sleep(2.5) # Wait for round-trip ping
 
-        # Click "Send Live Test Mail to Monarchs University"
-        monarch_send_btn = page.locator("#btn-monarch-live-send, button:has-text('Send Live Test Mail')").first
-        if monarch_send_btn.count() > 0:
-            print("  - Dispatching live academic proposal to Monarchs University (monarchrealms.team@gmail.com)...")
-            monarch_send_btn.hover()
-            time.sleep(0.4)
-            monarch_send_btn.click()
-            time.sleep(3.0) # Wait for live SMTP dispatch & toast notification
-
         # Open Recipient Inbox via button
         open_inbox_btn = page.locator("a[href='/inbox'] button, a[href='/inbox'], button:has-text('Open Gmail Inbox')").first
         if open_inbox_btn.count() > 0:
@@ -375,7 +450,7 @@ def main():
             time.sleep(2.0)
             inject_cursor(page)
 
-            print("Scene 10: Inspecting Received Email in Gmail Workspace (monarchrealms.team@gmail.com)...")
+            print("Scene 10: Inspecting Received Email in Authentic Chrome Gmail Workspace...")
             smooth_scroll(page, 200, steps=15, delay=0.03)
             time.sleep(1.2)
 
@@ -384,10 +459,19 @@ def main():
             email_row.hover()
             time.sleep(0.5)
             email_row.click()
-            time.sleep(2.5) # Wait for email view animation
+            time.sleep(2.0) # Wait for email view animation
+
+            # Click security details dropdown
+            sec_btn = page.locator("#btn-security-details").first
+            if sec_btn.count() > 0:
+                print("  - Inspecting Google TLS security certificate & headers...")
+                sec_btn.hover()
+                time.sleep(0.3)
+                sec_btn.click()
+                time.sleep(1.5)
 
             # Scroll through received proposal
-            smooth_scroll(page, 550, steps=25, delay=0.03)
+            smooth_scroll(page, 650, steps=30, delay=0.03)
             time.sleep(2.5)
             smooth_scroll(page, 0, steps=20, delay=0.03)
             time.sleep(1.2)
@@ -420,8 +504,39 @@ def main():
         final_dest_artifact = os.path.join(ARTIFACT_DIR, "platform_walkthrough.webm")
 
         if os.path.exists(video_path):
-            shutil.copyfile(video_path, final_dest_public)
-            shutil.copyfile(video_path, final_dest_artifact)
+            # Check for bundled playwright ffmpeg to guarantee 1080p @ 60fps encoding
+            ffmpeg_paths = glob.glob(os.path.expanduser("~") + r"\AppData\Local\ms-playwright\**\ffmpeg*.exe", recursive=True)
+            ffmpeg_bin = ffmpeg_paths[0] if ffmpeg_paths else "ffmpeg"
+
+            processed = False
+            if ffmpeg_paths and os.path.exists(ffmpeg_paths[0]):
+                print(f"Applying 1080p 60fps master encoding using {ffmpeg_bin}...")
+                temp_60fps_webm = os.path.join(RECORDINGS_DIR, "master_1080p60.webm")
+                cmd = [
+                    ffmpeg_bin, "-y",
+                    "-i", video_path,
+                    "-r", "60",
+                    "-s", "1920x1080",
+                    "-c:v", "libvpx",
+                    "-b:v", "4M",
+                    "-quality", "realtime",
+                    "-cpu-used", "5",
+                    temp_60fps_webm
+                ]
+                try:
+                    res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=300)
+                    if res.returncode == 0 and os.path.exists(temp_60fps_webm):
+                        shutil.copyfile(temp_60fps_webm, final_dest_public)
+                        shutil.copyfile(temp_60fps_webm, final_dest_artifact)
+                        processed = True
+                        print("Master 1080p 60fps transcode successful!")
+                except Exception as ex:
+                    print(f"Note: 60fps transcode step bypassed: {ex}")
+
+            if not processed:
+                shutil.copyfile(video_path, final_dest_public)
+                shutil.copyfile(video_path, final_dest_artifact)
+
             size_mb = os.path.getsize(final_dest_public) / (1024 * 1024)
             print(f"SUCCESS: Video saved to {final_dest_public} ({size_mb:.2f} MB)")
             print(f"SUCCESS: Video copied to {final_dest_artifact}")

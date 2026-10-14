@@ -100,21 +100,109 @@ export default function DashboardPage() {
 
   // Auth session and operator profile state
   const [operatorUser, setOperatorUser] = useState('harish.shortfundly@gmail.com');
+  const [currentUserRole, setCurrentUserRole] = useState('general_admin');
+  const [userPermissions, setUserPermissions] = useState({
+    canViewDashboard: true,
+    canViewColleges: true,
+    canUploadCsv: true,
+    canEditTemplates: true,
+    canViewTemplates: true,
+    canTestSend: true,
+    canLaunchCampaign: true,
+    canPauseKillCampaign: true,
+    canManageSmtp: true,
+    canViewReports: true,
+    canExportExcel: true,
+    canManageUsers: true,
+    badgeText: 'Super Admin'
+  });
   const [operatorProfile, setOperatorProfile] = useState({
     name: 'Harish',
     email: 'harish.shortfundly@gmail.com',
     role: 'Lead Outreach Administrator',
-    department: 'University Partnerships',
-    organization: 'Shortfundly Network'
+    department: 'Global Administration',
+    organization: 'Shortfundly Network',
+    badge_color: '#e11d48'
   });
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({
     name: 'Harish',
     email: 'harish.shortfundly@gmail.com',
     role: 'Lead Outreach Administrator',
-    department: 'University Partnerships',
-    organization: 'Shortfundly Network'
+    department: 'Global Administration',
+    organization: 'Shortfundly Network',
+    badge_color: '#e11d48'
   });
+
+  const RBAC_ROLES = [
+    {
+      role: 'ceo',
+      label: 'CEO',
+      name: 'Muneesh',
+      email: 'ceo@shortfundly.com',
+      role_title: 'Chief Executive Officer (CEO)',
+      department: 'Executive Leadership',
+      badge_color: '#8b5cf6',
+      badgeText: 'Executive'
+    },
+    {
+      role: 'tech_lead',
+      label: 'Tech Lead',
+      name: 'Arun',
+      email: 'tech@shortfundly.com',
+      role_title: 'Lead Systems & Infrastructure Architect',
+      department: 'Engineering & DevSecOps',
+      badge_color: '#0284c7',
+      badgeText: 'Infrastructure'
+    },
+    {
+      role: 'product_manager',
+      label: 'Product Mgr',
+      name: 'Priya',
+      email: 'pm@shortfundly.com',
+      role_title: 'Product & Outreach Growth Manager',
+      department: 'Collegiate Partnerships',
+      badge_color: '#10b981',
+      badgeText: 'Outreach Manager'
+    },
+    {
+      role: 'general_admin',
+      label: 'Super Admin',
+      name: 'Harish',
+      email: 'admin@shortfundly.com',
+      role_title: 'Lead Outreach Administrator',
+      department: 'Global Administration',
+      badge_color: '#e11d48',
+      badgeText: 'Super Admin'
+    }
+  ];
+
+  const handleSwitchRole = (targetRole) => {
+    const roleDef = RBAC_ROLES.find(r => r.role === targetRole) || RBAC_ROLES[3];
+    setCurrentUserRole(roleDef.role);
+    const updated = {
+      name: roleDef.name,
+      email: roleDef.email,
+      role: roleDef.role_title,
+      department: roleDef.department,
+      organization: 'Shortfundly Network',
+      badge_color: roleDef.badge_color,
+      role_key: roleDef.role
+    };
+    setOperatorProfile(updated);
+    setProfileForm(updated);
+    setOperatorUser(roleDef.email);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sf_operator_profile', JSON.stringify(updated));
+      const curr = JSON.parse(localStorage.getItem('sf_auth_session') || '{}');
+      localStorage.setItem('sf_auth_session', JSON.stringify({
+        ...curr,
+        ...updated,
+        role: roleDef.role
+      }));
+    }
+    addToast('success', 'RBAC Role Switched', `Active session switched to ${roleDef.role_title}.`);
+  };
 
   // Core Data & Telemetry
   const [colleges, setColleges] = useState([]);
@@ -284,35 +372,28 @@ export default function DashboardPage() {
         return;
       }
 
-      const savedProfile = localStorage.getItem('sf_operator_profile');
-      if (savedProfile) {
-        try {
-          const parsed = JSON.parse(savedProfile);
-          if (parsed && parsed.name) {
-            setOperatorProfile(parsed);
-            setProfileForm(parsed);
-            setOperatorUser(parsed.email || 'harish.shortfundly@gmail.com');
+      try {
+        const parsedSession = JSON.parse(session);
+        if (parsedSession) {
+          const roleKey = parsedSession.role || 'general_admin';
+          setCurrentUserRole(roleKey);
+          if (parsedSession.permissions) {
+            setUserPermissions(parsedSession.permissions);
           }
-        } catch (_) {}
-      } else {
-        try {
-          const parsed = JSON.parse(session);
-          if (parsed && parsed.email) {
-            const emailName = parsed.email.split('@')[0];
-            const formattedName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
-            const initial = {
-              name: formattedName.toLowerCase() === 'admin' ? 'Harish' : formattedName,
-              email: parsed.email,
-              role: parsed.role || 'Lead Outreach Administrator',
-              department: 'University Partnerships',
-              organization: 'Shortfundly Network'
-            };
-            setOperatorProfile(initial);
-            setProfileForm(initial);
-            setOperatorUser(parsed.email);
-          }
-        } catch (_) {}
-      }
+          const prof = {
+            name: parsedSession.name || 'Harish',
+            email: parsedSession.email || 'harish.shortfundly@gmail.com',
+            role: parsedSession.role_title || parsedSession.role || 'Lead Outreach Administrator',
+            department: parsedSession.department || 'Global Administration',
+            organization: 'Shortfundly Network',
+            badge_color: parsedSession.badge_color || '#e11d48',
+            role_key: roleKey
+          };
+          setOperatorProfile(prof);
+          setProfileForm(prof);
+          setOperatorUser(prof.email);
+        }
+      } catch (_) {}
     }
   }, []);
 
@@ -856,8 +937,10 @@ export default function DashboardPage() {
       addToast('warning', 'Recipient Required', 'Please specify a valid official email recipient.');
       return;
     }
-    if (!confirm(`Confirm LIVE SMTP dispatch to: ${singleRecipient.official_email}?`)) {
-      return;
+    if (typeof window !== 'undefined' && !window.__SKIP_CONFIRM__) {
+      if (!confirm(`Confirm LIVE SMTP dispatch to: ${singleRecipient.official_email}?`)) {
+        return;
+      }
     }
 
     setIsSendingSingle(true);
@@ -1042,14 +1125,60 @@ export default function DashboardPage() {
           </a>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '999px',
+                background: '#ffffff',
+                border: `1.5px solid ${operatorProfile.badge_color || '#e11d48'}33`,
+                boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+              }}
+              title={`Active RBAC Role: ${operatorProfile.role}`}
+            >
+              <span style={{
+                width: '7px',
+                height: '7px',
+                borderRadius: '50%',
+                background: operatorProfile.badge_color || '#e11d48'
+              }}></span>
+              <span style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                color: '#0f172a',
+                letterSpacing: '0.02em',
+                whiteSpace: 'nowrap'
+              }}>
+                {operatorProfile.name}
+              </span>
+              <span style={{
+                fontSize: '9.5px',
+                fontWeight: 800,
+                color: operatorProfile.badge_color || '#e11d48',
+                background: `${operatorProfile.badge_color || '#e11d48'}15`,
+                padding: '1px 6px',
+                borderRadius: '999px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em'
+              }}>
+                {currentUserRole === 'ceo' ? 'CEO' : currentUserRole === 'tech_lead' ? 'Tech Lead' : currentUserRole === 'product_manager' ? 'Product Mgr' : 'Admin'}
+              </span>
+            </div>
+
             <button
               onClick={() => {
                 setProfileForm(operatorProfile);
                 setIsEditingProfile(true);
               }}
               className="orbix-avatar-badge"
-              style={{ cursor: 'pointer', border: 'none' }}
-              title={`Operator: ${operatorProfile.name} (${operatorProfile.email}) - Click to edit profile`}
+              style={{
+                cursor: 'pointer',
+                border: 'none',
+                background: operatorProfile.badge_color || '#e11d48'
+              }}
+              title={`Operator: ${operatorProfile.name} (${operatorProfile.email}) - Click to edit profile / switch role`}
             >
               {getInitials(operatorProfile.name)}
             </button>

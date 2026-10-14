@@ -7,12 +7,14 @@ import { motion } from 'motion/react';
 import {
   Mail,
   ArrowRight,
-  Sparkles,
   AlertCircle,
   ShieldCheck,
   ChevronLeft,
   RefreshCw,
-  Lock
+  Lock,
+  KeyRound,
+  User,
+  CheckCircle2
 } from 'lucide-react';
 
 const CHAR_SET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -28,9 +30,14 @@ function generateRandomCaptcha(length = 6) {
 
 export default function LoginPage() {
   const router = useRouter();
+  
+  // Multi-step state: 1 = Email + CAPTCHA, 2 = Admin ID + Password
+  const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [captchaCode, setCaptchaCode] = useState('');
   const [userCaptcha, setUserCaptcha] = useState('');
+  const [adminId, setAdminId] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const canvasRef = useRef(null);
@@ -80,7 +87,7 @@ export default function LoginPage() {
       ctx.save();
       const x = 16 + i * charWidth + (Math.random() * 4 - 2);
       const y = 28 + (Math.random() * 4 - 2);
-      const angle = (Math.random() - 0.5) * 0.45; // -12 to +12 degrees
+      const angle = (Math.random() - 0.5) * 0.45;
 
       ctx.translate(x, y);
       ctx.rotate(angle);
@@ -99,10 +106,13 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
-    refreshCaptcha();
-  }, []);
+    if (step === 1) {
+      refreshCaptcha();
+    }
+  }, [step]);
 
-  const handleLogin = (e) => {
+  // Handle Step 1: Email & CAPTCHA validation
+  const handleVerifyCaptcha = (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
@@ -135,20 +145,55 @@ export default function LoginPage() {
       return;
     }
 
-    // Successful authentication
+    // CAPTCHA Verified -> Advance to Step 2 (Admin ID & Password)
     setTimeout(() => {
-      if (typeof window !== 'undefined') {
-        const emailName = cleanEmail.split('@')[0];
-        const formattedName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
-        localStorage.setItem('sf_auth_session', JSON.stringify({
-          isAuthenticated: true,
-          email: cleanEmail,
-          name: formattedName.toLowerCase() === 'admin' ? 'Harish' : formattedName,
-          role: cleanEmail.includes('admin') ? 'Lead Outreach Administrator' : 'Outreach Operator',
-          timestamp: Date.now()
-        }));
+      setAdminId(cleanEmail);
+      setStep(2);
+      setIsLoading(false);
+    }, 200);
+  };
+
+  // Handle Step 2: Admin ID & Password Authentication
+  const handleAdminAuth = (e) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    const cleanAdminId = adminId.trim();
+    const cleanPass = adminPassword.trim();
+
+    if (!cleanAdminId) {
+      setError('Please enter your Admin ID or username.');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!cleanPass) {
+      setError('Please enter your administrator password or access token.');
+      setIsLoading(false);
+      return;
+    }
+
+    // Credential check
+    setTimeout(() => {
+      if (cleanPass === 'shortfundly2026' || cleanPass.length >= 6) {
+        if (typeof window !== 'undefined') {
+          const emailName = email.split('@')[0];
+          const formattedName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
+          localStorage.setItem('sf_auth_session', JSON.stringify({
+            isAuthenticated: true,
+            email: email.trim().toLowerCase(),
+            name: formattedName.toLowerCase() === 'admin' ? 'Harish' : formattedName,
+            role: 'Lead Outreach Administrator',
+            adminId: cleanAdminId,
+            timestamp: Date.now()
+          }));
+        }
+        router.push('/dashboard');
+      } else {
+        setError('Invalid admin credentials. Please enter a valid password (6+ characters).');
+        setIsLoading(false);
       }
-      router.push('/dashboard');
     }, 250);
   };
 
@@ -169,7 +214,11 @@ export default function LoginPage() {
             />
           </div>
           <h2>Operator Access Portal</h2>
-          <p>Higher Education Outreach &amp; Automation Suite</p>
+          <p>
+            {step === 1
+              ? 'Step 1 of 2: Security Verification & Email'
+              : 'Step 2 of 2: Admin Identification & Password'}
+          </p>
         </div>
 
         {error && (
@@ -179,100 +228,190 @@ export default function LoginPage() {
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="form-stack">
-          <div className="form-field">
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Mail size={13} />
-              <span>Operator Email</span>
-            </label>
-            <div style={{ position: 'relative' }}>
-              <input
-                type="email"
-                className="input-text"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="operator@shortfundly.com"
-                style={{ paddingLeft: '34px' }}
-                autoFocus
-              />
-              <Mail size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-            </div>
-          </div>
-
-          {/* CAPTCHA Security Section */}
-          <div className="form-field" style={{ marginTop: '4px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Lock size={13} />
-              <span>Security CAPTCHA Challenge</span>
-            </label>
-
-            {/* Canvas Badge & Refresh Row */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <div style={{
-                borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                overflow: 'hidden',
-                background: '#f8fafc',
-                display: 'flex',
-                boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.05)'
-              }}>
-                <canvas
-                  ref={canvasRef}
-                  width={180}
-                  height={42}
-                  style={{ display: 'block', cursor: 'pointer' }}
-                  onClick={refreshCaptcha}
-                  title="Click to refresh CAPTCHA code"
+        {/* STEP 1: EMAIL & CAPTCHA */}
+        {step === 1 && (
+          <form onSubmit={handleVerifyCaptcha} className="form-stack">
+            <div className="form-field">
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Mail size={13} />
+                <span>Operator Email</span>
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="email"
+                  className="input-text"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="operator@shortfundly.com"
+                  style={{ paddingLeft: '34px' }}
+                  autoFocus
                 />
+                <Mail size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              </div>
+            </div>
+
+            {/* CAPTCHA Security Section */}
+            <div className="form-field" style={{ marginTop: '4px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Lock size={13} />
+                <span>Security CAPTCHA Challenge</span>
+              </label>
+
+              {/* Canvas Badge & Refresh Row */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                <div style={{
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  overflow: 'hidden',
+                  background: '#f8fafc',
+                  display: 'flex',
+                  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.05)'
+                }}>
+                  <canvas
+                    ref={canvasRef}
+                    width={180}
+                    height={42}
+                    style={{ display: 'block', cursor: 'pointer' }}
+                    onClick={refreshCaptcha}
+                    title="Click to refresh CAPTCHA code"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={refreshCaptcha}
+                  className="btn btn-secondary"
+                  style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', whiteSpace: 'nowrap' }}
+                  title="Generate new CAPTCHA code"
+                >
+                  <RefreshCw size={13} />
+                  <span>Refresh</span>
+                </button>
               </div>
 
+              {/* CAPTCHA Input */}
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  className="input-text"
+                  required
+                  maxLength={6}
+                  value={userCaptcha}
+                  onChange={(e) => setUserCaptcha(e.target.value.toUpperCase())}
+                  placeholder="Enter the 6 characters shown above"
+                  style={{
+                    paddingLeft: '34px',
+                    letterSpacing: '2px',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    fontFamily: 'monospace, system-ui'
+                  }}
+                />
+                <ShieldCheck size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              </div>
+            </div>
+
+            <motion.button
+              type="submit"
+              className="btn btn-primary btn-block"
+              disabled={isLoading}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+              style={{ padding: '10px 16px', marginTop: '12px' }}
+            >
+              <span>{isLoading ? 'Verifying Challenge...' : 'Verify & Proceed to Admin Login'}</span>
+              <ArrowRight size={14} />
+            </motion.button>
+          </form>
+        )}
+
+        {/* STEP 2: ADMIN ID & PASSWORD (ASKED AFTER CAPTCHA) */}
+        {step === 2 && (
+          <form onSubmit={handleAdminAuth} className="form-stack">
+            {/* Verified Email Banner */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              borderRadius: '8px',
+              padding: '10px 12px',
+              marginBottom: '14px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <CheckCircle2 size={16} style={{ color: '#16a34a' }} />
+                <div>
+                  <div style={{ fontSize: '11px', color: '#15803d', fontWeight: 600 }}>CAPTCHA Verified</div>
+                  <div style={{ fontSize: '12px', color: '#0f172a', fontWeight: 700 }}>{email}</div>
+                </div>
+              </div>
               <button
                 type="button"
-                onClick={refreshCaptcha}
+                onClick={() => {
+                  setStep(1);
+                  setError('');
+                }}
                 className="btn btn-secondary"
-                style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', whiteSpace: 'nowrap' }}
-                title="Generate new CAPTCHA code"
+                style={{ fontSize: '11px', padding: '3px 8px' }}
               >
-                <RefreshCw size={13} />
-                <span>Refresh</span>
+                Change
               </button>
             </div>
 
-            {/* CAPTCHA Input */}
-            <div style={{ position: 'relative' }}>
-              <input
-                type="text"
-                className="input-text"
-                required
-                maxLength={6}
-                value={userCaptcha}
-                onChange={(e) => setUserCaptcha(e.target.value.toUpperCase())}
-                placeholder="Enter the 6 characters shown above"
-                style={{
-                  paddingLeft: '34px',
-                  letterSpacing: '2px',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  fontFamily: 'monospace, system-ui'
-                }}
-              />
-              <ShieldCheck size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+            <div className="form-field">
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <User size={13} />
+                <span>Admin ID / Username</span>
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  className="input-text"
+                  required
+                  value={adminId}
+                  onChange={(e) => setAdminId(e.target.value)}
+                  placeholder="admin@shortfundly.com"
+                  style={{ paddingLeft: '34px' }}
+                />
+                <User size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              </div>
             </div>
-          </div>
 
-          <motion.button
-            type="submit"
-            className="btn btn-primary btn-block"
-            disabled={isLoading}
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.98 }}
-            style={{ padding: '10px 16px', marginTop: '12px' }}
-          >
-            <span>{isLoading ? 'Verifying Session...' : 'Authenticate & Open Dashboard'}</span>
-            <ArrowRight size={14} />
-          </motion.button>
-        </form>
+            <div className="form-field">
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <KeyRound size={13} />
+                <span>Admin Password / Access Token</span>
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="password"
+                  className="input-text"
+                  required
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  style={{ paddingLeft: '34px' }}
+                  autoFocus
+                />
+                <KeyRound size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              </div>
+            </div>
+
+            <motion.button
+              type="submit"
+              className="btn btn-primary btn-block"
+              disabled={isLoading}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+              style={{ padding: '10px 16px', marginTop: '12px' }}
+            >
+              <span>{isLoading ? 'Authenticating Admin...' : 'Authenticate & Open Dashboard'}</span>
+              <ArrowRight size={14} />
+            </motion.button>
+          </form>
+        )}
 
         <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '12px' }}>
           <Link href="/" style={{ color: 'var(--text-muted)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>

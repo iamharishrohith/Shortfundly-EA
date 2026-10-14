@@ -38,13 +38,13 @@ export default function LandingPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '14px' }}>
           <img
-            src="/images/shortfundly-logo.png"
+            src="/images/shortfundly-logo.png?v=2"
             alt="Shortfundly OTT Marketplace"
-            style={{ height: '34px', width: 'auto', objectFit: 'contain' }}
+            style={{ height: '64px', width: 'auto', objectFit: 'contain', display: 'block' }}
           />
-          <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b', paddingLeft: '10px', borderLeft: '1px solid #e2e8f0' }}>
+          <span style={{ fontSize: '13px', fontWeight: 700, color: '#64748b', paddingLeft: '14px', borderLeft: '1.5px solid #cbd5e1', whiteSpace: 'nowrap' }}>
             Campus Outreach
           </span>
         </Link>
@@ -66,7 +66,7 @@ export default function LandingPage() {
       </motion.nav>
 
       {/* 2. HERO SECTION */}
-      <section className="landing-hero" style={{ marginBottom: '32px' }}>
+      <section className="landing-hero" style={{ marginBottom: '14px' }}>
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -79,20 +79,20 @@ export default function LandingPage() {
 
           <p className="hero-subtitle">
             Scale your university partnerships, collegiate short film festivals, and academic initiatives.
-            Engineered with a future-ready pan-India architecture &mdash; currently powering outreach across Maharashtra's premier universities and colleges with verified official contacts.
+            Engineered with a future-ready pan-India architecture &mdash; powering outreach across premier universities, colleges, and academic networks with verified official contacts.
           </p>
 
           <div className="hero-cta-group" style={{ justifyContent: 'center' }}>
             <Link href="/login" style={{ textDecoration: 'none' }}>
               <motion.button
                 className="btn btn-primary"
-                style={{ padding: '12px 28px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', borderRadius: 'var(--radius-sm)' }}
+                style={{ padding: '9px 22px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', borderRadius: 'var(--radius-sm)' }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <Lock size={15} />
+                <Lock size={14} />
                 <span>Launch Automation Deck</span>
-                <ArrowRight size={15} />
+                <ArrowRight size={14} />
               </motion.button>
             </Link>
           </div>
@@ -100,20 +100,18 @@ export default function LandingPage() {
       </section>
 
       {/* 5. 6-TILE BENTO FEATURE MATRIX */}
-      <section style={{ marginTop: '24px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-          <span className="section-tag">Enterprise Capabilities</span>
-          <h2 className="section-title">Engineered for Flawless Academic Delivery</h2>
-          <p className="section-subtitle">
-            Reaching high-ranking university authorities across Maharashtra with an architecture built to expand nationwide.
-          </p>
+      <section style={{ marginTop: '10px', marginBottom: '14px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+          <span className="section-tag" style={{ margin: 0, padding: '3px 10px', fontSize: '10.5px' }}>
+            Enterprise Capabilities &bull; 6 Core Pillars
+          </span>
         </div>
 
         <div className="hero-bento-grid">
           {/* Tile 1 */}
           <div className="hero-bento-tile">
             <div className="hero-bento-icon">
-              <Database size={20} />
+              <Database size={15} />
             </div>
             <h3 className="hero-bento-heading">Verified Institutional Directory</h3>
             <p className="hero-bento-desc">
@@ -124,7 +122,7 @@ export default function LandingPage() {
           {/* Tile 2 */}
           <div className="hero-bento-tile">
             <div className="hero-bento-icon">
-              <Network size={20} />
+              <Network size={15} />
             </div>
             <h3 className="hero-bento-heading">Pre-flight MX DNS Validation</h3>
             <p className="hero-bento-desc">
@@ -135,7 +133,7 @@ export default function LandingPage() {
           {/* Tile 3 */}
           <div className="hero-bento-tile">
             <div className="hero-bento-icon">
-              <Tag size={20} />
+              <Tag size={15} />
             </div>
             <h3 className="hero-bento-heading">Jinja Tag Personalization</h3>
             <p className="hero-bento-desc">
@@ -146,7 +144,7 @@ export default function LandingPage() {
           {/* Tile 4 */}
           <div className="hero-bento-tile">
             <div className="hero-bento-icon">
-              <Zap size={20} />
+              <Zap size={15} />
             </div>
             <h3 className="hero-bento-heading">Adaptive Rate Throttling</h3>
             <p className="hero-bento-desc">
@@ -157,7 +155,7 @@ export default function LandingPage() {
           {/* Tile 5 */}
           <div className="hero-bento-tile">
             <div className="hero-bento-icon">
-              <ShieldCheck size={20} />
+              <ShieldCheck size={15} />
             </div>
             <h3 className="hero-bento-heading">SHA-256 Deduplication Shield</h3>
             <p className="hero-bento-desc">
@@ -168,7 +166,7 @@ export default function LandingPage() {
           {/* Tile 6 */}
           <div className="hero-bento-tile">
             <div className="hero-bento-icon">
-              <FileSpreadsheet size={20} />
+              <FileSpreadsheet size={15} />
             </div>
             <h3 className="hero-bento-heading">Audit Ledger &amp; Excel Export</h3>
             <p className="hero-bento-desc">

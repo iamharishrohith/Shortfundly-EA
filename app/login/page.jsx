@@ -101,6 +101,9 @@ export default function LoginPage() {
   const refreshCaptcha = () => {
     const newCode = generateRandomCaptcha(6);
     setCaptchaCode(newCode);
+    if (typeof window !== 'undefined') {
+      window.__CAPTCHA_CODE__ = newCode;
+    }
     setUserCaptcha('');
     setTimeout(() => drawCaptcha(newCode), 20);
   };
@@ -206,11 +209,11 @@ export default function LoginPage() {
         transition={{ duration: 0.3 }}
       >
         <div className="auth-header">
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '18px' }}>
             <img
-              src="/images/shortfundly-logo.png"
+              src="/images/shortfundly-logo.png?v=2"
               alt="Shortfundly OTT Marketplace"
-              style={{ height: '40px', width: 'auto', objectFit: 'contain' }}
+              style={{ height: '68px', width: 'auto', objectFit: 'contain' }}
             />
           </div>
           <h2>Operator Access Portal</h2>
@@ -270,6 +273,7 @@ export default function LoginPage() {
                 }}>
                   <canvas
                     ref={canvasRef}
+                    data-captcha-code={captchaCode}
                     width={180}
                     height={42}
                     style={{ display: 'block', cursor: 'pointer' }}

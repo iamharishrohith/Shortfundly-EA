@@ -900,28 +900,31 @@ export default function DashboardPage() {
         transition={{ duration: 0.25 }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px' }}>
             <img
-              src="/images/shortfundly-logo.png"
+              src="/images/shortfundly-logo.png?v=2"
               alt="Shortfundly OTT Marketplace"
               style={{
-                height: '32px',
+                height: '64px',
                 width: 'auto',
                 objectFit: 'contain',
                 display: 'block'
               }}
             />
             <div style={{
-              fontSize: '11px',
+              fontSize: '12px',
               color: '#64748b',
-              fontWeight: 600,
-              paddingLeft: '8px',
-              borderLeft: '1px solid #cbd5e1',
-              lineHeight: 1.2
+              fontWeight: 700,
+              paddingLeft: '12px',
+              borderLeft: '1.5px solid #cbd5e1',
+              lineHeight: 1.3,
+              letterSpacing: '0.04em',
+              whiteSpace: 'nowrap'
             }}>
-              Campus Outreach
+              CAMPUS OUTREACH
             </div>
           </Link>
+
 
 
           <div className="orbix-capsule-nav">

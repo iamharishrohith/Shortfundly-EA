@@ -278,6 +278,12 @@ export default function DashboardPage() {
   // Auth check & profile loader
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      const session = localStorage.getItem('sf_auth_session');
+      if (!session) {
+        router.push('/login');
+        return;
+      }
+
       const savedProfile = localStorage.getItem('sf_operator_profile');
       if (savedProfile) {
         try {
@@ -289,26 +295,23 @@ export default function DashboardPage() {
           }
         } catch (_) {}
       } else {
-        const session = localStorage.getItem('sf_auth_session');
-        if (session) {
-          try {
-            const parsed = JSON.parse(session);
-            if (parsed && parsed.email) {
-              const emailName = parsed.email.split('@')[0];
-              const formattedName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
-              const initial = {
-                name: formattedName.toLowerCase() === 'admin' ? 'Harish' : formattedName,
-                email: parsed.email,
-                role: parsed.role || 'Lead Outreach Administrator',
-                department: 'University Partnerships',
-                organization: 'Shortfundly Network'
-              };
-              setOperatorProfile(initial);
-              setProfileForm(initial);
-              setOperatorUser(parsed.email);
-            }
-          } catch (_) {}
-        }
+        try {
+          const parsed = JSON.parse(session);
+          if (parsed && parsed.email) {
+            const emailName = parsed.email.split('@')[0];
+            const formattedName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
+            const initial = {
+              name: formattedName.toLowerCase() === 'admin' ? 'Harish' : formattedName,
+              email: parsed.email,
+              role: parsed.role || 'Lead Outreach Administrator',
+              department: 'University Partnerships',
+              organization: 'Shortfundly Network'
+            };
+            setOperatorProfile(initial);
+            setProfileForm(initial);
+            setOperatorUser(parsed.email);
+          }
+        } catch (_) {}
       }
     }
   }, []);
@@ -897,29 +900,29 @@ export default function DashboardPage() {
         transition={{ duration: 0.25 }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <img
+              src="/images/shortfundly-logo.png"
+              alt="Shortfundly OTT Marketplace"
+              style={{
+                height: '32px',
+                width: 'auto',
+                objectFit: 'contain',
+                display: 'block'
+              }}
+            />
             <div style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '8px',
-              background: 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)',
-              color: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(225, 29, 72, 0.25)'
+              fontSize: '11px',
+              color: '#64748b',
+              fontWeight: 600,
+              paddingLeft: '8px',
+              borderLeft: '1px solid #cbd5e1',
+              lineHeight: 1.2
             }}>
-              <Sparkles size={16} />
+              Campus Outreach
             </div>
-            <div>
-              <div style={{ fontSize: '13px', fontWeight: 800, letterSpacing: '-0.01em', color: '#0f172a' }}>
-                SHORTFUNDLY
-              </div>
-              <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 500, lineHeight: 1 }}>
-                Campus Outreach Suite
-              </div>
-            </div>
-          </div>
+          </Link>
+
 
           <div className="orbix-capsule-nav">
             <button

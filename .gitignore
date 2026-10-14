@@ -1,4 +1,4 @@
-﻿# Dependencies
+# Dependencies
 /node_modules
 /.pnp
 .pnp.js
@@ -38,3 +38,4 @@ __pycache__/
 Thumbs.db
 .vscode/
 .idea/
+~$*

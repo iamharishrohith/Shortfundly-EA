@@ -38,33 +38,27 @@ export default function LandingPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <div className="brand-section">
-          <div className="brand-badge">SHORTFUNDLY</div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-title)', letterSpacing: '-0.01em' }}>
-                Campus Outreach
-              </span>
-            </div>
-          </div>
-        </div>
+        <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <img
+            src="/images/shortfundly-logo.png"
+            alt="Shortfundly OTT Marketplace"
+            style={{ height: '34px', width: 'auto', objectFit: 'contain' }}
+          />
+          <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b', paddingLeft: '10px', borderLeft: '1px solid #e2e8f0' }}>
+            Campus Outreach
+          </span>
+        </Link>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           <div className="header-status-box" style={{ display: 'none', md: 'flex' }}>
             <span className="status-dot"></span>
-            <span style={{ fontSize: '12px' }}>Active Dataset: <strong>Maharashtra State</strong></span>
+            <span style={{ fontSize: '12px' }}>Outreach Engine: <strong>Live Relay Ready</strong></span>
           </div>
 
           <Link href="/login" style={{ textDecoration: 'none' }}>
-            <button className="btn btn-secondary" style={{ padding: '7px 14px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Lock size={13} style={{ color: 'var(--sf-red)' }} />
-              <span>Operator Login</span>
-            </button>
-          </Link>
-
-          <Link href="/dashboard" style={{ textDecoration: 'none' }}>
             <button className="btn btn-primary" style={{ padding: '7px 16px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>Enter Bento Deck</span>
+              <Lock size={13} />
+              <span>Operator Sign In</span>
               <ArrowRight size={14} />
             </button>
           </Link>
@@ -88,28 +82,17 @@ export default function LandingPage() {
             Engineered with a future-ready pan-India architecture &mdash; currently powering outreach across Maharashtra's premier universities and colleges with verified official contacts.
           </p>
 
-          <div className="hero-cta-group">
-            <Link href="/dashboard" style={{ textDecoration: 'none' }}>
-              <motion.button
-                className="btn btn-primary"
-                style={{ padding: '12px 24px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', borderRadius: 'var(--radius-sm)' }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <span>Launch Automation Deck</span>
-                <ArrowRight size={15} />
-              </motion.button>
-            </Link>
-
+          <div className="hero-cta-group" style={{ justifyContent: 'center' }}>
             <Link href="/login" style={{ textDecoration: 'none' }}>
               <motion.button
-                className="btn btn-dark"
-                style={{ padding: '12px 22px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', borderRadius: 'var(--radius-sm)' }}
+                className="btn btn-primary"
+                style={{ padding: '12px 28px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', borderRadius: 'var(--radius-sm)' }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <Lock size={14} />
-                <span>Operator Sign In</span>
+                <Lock size={15} />
+                <span>Launch Automation Deck</span>
+                <ArrowRight size={15} />
               </motion.button>
             </Link>
           </div>
@@ -267,8 +250,7 @@ export default function LandingPage() {
           &copy; {new Date().getFullYear()} <strong>Shortfundly</strong> &bull; Campus Outreach &amp; Academic Partnership Network
         </div>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          <Link href="/login" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Operator Portal</Link>
-          <Link href="/dashboard" style={{ color: 'var(--sf-red)', fontWeight: 600, textDecoration: 'none' }}>Launch Deck &rarr;</Link>
+          <Link href="/login" style={{ color: 'var(--sf-red)', fontWeight: 600, textDecoration: 'none' }}>Operator Sign In &rarr;</Link>
         </div>
       </footer>
     </div>

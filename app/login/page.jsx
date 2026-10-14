@@ -28,7 +28,7 @@ function generateRandomCaptcha(length = 6) {
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('admin@shortfundly.com');
+  const [email, setEmail] = useState('');
   const [captchaCode, setCaptchaCode] = useState('');
   const [userCaptcha, setUserCaptcha] = useState('');
   const [error, setError] = useState('');
@@ -152,11 +152,6 @@ export default function LoginPage() {
     }, 250);
   };
 
-  const handleFillDemo = () => {
-    setEmail('admin@shortfundly.com');
-    setError('');
-  };
-
   return (
     <div className="auth-wrapper">
       <motion.div
@@ -166,30 +161,15 @@ export default function LoginPage() {
         transition={{ duration: 0.3 }}
       >
         <div className="auth-header">
-          <div className="brand-section" style={{ justifyContent: 'center', marginBottom: '8px' }}>
-            <div className="brand-badge">SHORTFUNDLY</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
+            <img
+              src="/images/shortfundly-logo.png"
+              alt="Shortfundly OTT Marketplace"
+              style={{ height: '40px', width: 'auto', objectFit: 'contain' }}
+            />
           </div>
           <h2>Operator Access Portal</h2>
           <p>Higher Education Outreach &amp; Automation Suite</p>
-        </div>
-
-        <div className="demo-account-box">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: 'var(--text-title)', marginBottom: '4px' }}>
-            <ShieldCheck size={14} style={{ color: 'var(--sf-red)' }} />
-            <span>Secure Operator Verification</span>
-          </div>
-          <div style={{ fontSize: '11px', color: '#64748b' }}>
-            Passwordless single-factor email login protected by dynamic anti-bot CAPTCHA verification.
-          </div>
-          <button
-            type="button"
-            onClick={handleFillDemo}
-            className="btn btn-secondary"
-            style={{ width: '100%', marginTop: '8px', padding: '5px 10px', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-          >
-            <Sparkles size={13} style={{ color: 'var(--sf-red)' }} />
-            <span>Use Default Operator (admin@shortfundly.com)</span>
-          </button>
         </div>
 
         {error && (
@@ -222,12 +202,9 @@ export default function LoginPage() {
 
           {/* CAPTCHA Security Section */}
           <div className="form-field" style={{ marginTop: '4px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Lock size={13} />
-                <span>Security CAPTCHA Challenge</span>
-              </span>
-              <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 500 }}>Anti-Bot Protection</span>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Lock size={13} />
+              <span>Security CAPTCHA Challenge</span>
             </label>
 
             {/* Canvas Badge & Refresh Row */}

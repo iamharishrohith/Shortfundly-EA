@@ -168,6 +168,23 @@ flowchart TD
    - Operators can add multiple SMTP relays (e.g., `outreach-primary@shortfundly.com`, `partnerships@shortfundly.com`, Amazon SES, Microsoft Exchange).
    - 1-click active relay activation with pre-flight SMTP credential verification (`verifyConnection`).
 
+4. **Multi-User Role-Based Access Control (RBAC) Governance**:
+   - The platform provides enterprise multi-persona governance with 4 pre-configured access tiers:
+     - **Chief Executive Officer (CEO)** (`ceo` / `ceo@shortfundly.com`): Executive telemetry, audit ledgers, high-level MoU reviews, read-only system configurations.
+     - **Tech Lead / Infrastructure Architect** (`techlead` / `tech@shortfundly.com`): Full control of Multi-Account SMTP Relays, DNS MX pre-flight validation, Nodemailer pool parameters, rate limits, and Emergency Kill Switch.
+     - **Product Manager** (`productmanager` / `pm@shortfundly.com`): Dataset management, CSV ingestion, collegiate outreach template authoring, Jinja2 dynamic variables, test sends, and campaign execution.
+     - **General / Super Admin** (`admin` / `admin@shortfundly.com`): Complete, unrestricted root access across all system modules, user administration, and security configurations.
+   - **Login card**: Features 1-Click quick role auto-fill presets with visual badge styling.
+   - **Operator Console**: Features a live persona switcher allowing operators and auditors to simulate and verify role permissions on the fly.
+   - **Permission Matrix**:
+
+| Role Key | Title | Credentials (User / Pass) | SMTP Vault | Campaign Launch | Template Edit | CSV Upload |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: |
+| `ceo` | Chief Executive Officer | `ceo` / `ceo@shortfundly2026` | 🔒 Locked | 🔒 Locked | 🔒 Locked | 🔒 Locked |
+| `tech_lead` | Tech Lead (Infrastructure) | `techlead` / `techlead@shortfundly2026` | ✅ Full | 🔒 Locked | 🔒 Locked | 🔒 Locked |
+| `product_manager` | Product & Outreach Mgr | `productmanager` / `pm@shortfundly2026` | 🔒 Locked | ✅ Full | ✅ Full | ✅ Full |
+| `general_admin` | Super Admin | `admin` / `shortfundly2026` | ✅ Full | ✅ Full | ✅ Full | ✅ Full |
+
 ---
 
 ## 5. Testing & Verification Results

@@ -303,55 +303,6 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Quick RBAC Role Presets Selector */}
-        <div style={{
-          marginBottom: '16px',
-          padding: '10px 12px',
-          background: 'rgba(241, 245, 249, 0.75)',
-          border: '1px solid #e2e8f0',
-          borderRadius: '10px'
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '6px'
-          }}>
-            <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Select RBAC Role Preset
-            </span>
-            <span style={{ fontSize: '10px', color: '#94a3b8' }}>1-Click Auto-Fill</span>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
-            {RBAC_PRESETS.map((p) => {
-              const isSelected = selectedRole === p.role;
-              return (
-                <button
-                  key={p.role}
-                  type="button"
-                  onClick={() => selectPreset(p)}
-                  style={{
-                    padding: '6px 4px',
-                    borderRadius: '6px',
-                    border: isSelected ? `1.5px solid ${p.color}` : '1px solid #cbd5e1',
-                    background: isSelected ? '#ffffff' : '#f8fafc',
-                    color: isSelected ? p.color : '#334155',
-                    fontSize: '11px',
-                    fontWeight: isSelected ? 800 : 600,
-                    cursor: 'pointer',
-                    textAlign: 'center',
-                    boxShadow: isSelected ? `0 2px 6px ${p.color}22` : 'none',
-                    transition: 'all 0.15s ease'
-                  }}
-                  title={`${p.name} — ${p.title}`}
-                >
-                  {p.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
         {error && (
           <div className="alert-box error" style={{ marginBottom: '16px', marginTop: 0 }}>
             <AlertCircle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />

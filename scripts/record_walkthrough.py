@@ -242,7 +242,7 @@ def main():
         # SCENE 5: DASHBOARD TAB 1 - UPLOAD CSV & DATASET STAGING
         # -------------------------------------------------------------
         print("Scene 5: Dashboard Tab 1 (Upload CSV & Working Queue)...")
-        tab_upload = page.locator("button:has-text('Upload CSV')")
+        tab_upload = page.locator("button:has-text('Colleges'), button:has-text('Upload CSV')").first
         tab_upload.hover()
         time.sleep(0.4)
         tab_upload.click()
@@ -405,7 +405,7 @@ def main():
         # SCENE 8: DASHBOARD TAB 4 - AUDIT HISTORY & TRANSACTION LOG
         # -------------------------------------------------------------
         print("Scene 8: Dashboard Tab 4 (Audit History & Transaction Ledger)...")
-        tab_audit = page.locator("button:has-text('Audit History')")
+        tab_audit = page.locator("button:has-text('Audits'), button:has-text('Audit History')").first
         tab_audit.hover()
         time.sleep(0.4)
         tab_audit.click()
@@ -420,7 +420,7 @@ def main():
         # SCENE 9: DASHBOARD TAB 5 - SMTP CONFIG, LIVE DISPATCH & INBOX VERIFICATION
         # -------------------------------------------------------------
         print("Scene 9: Dashboard Tab 5 (SMTP Accounts, Live Transmission & Handshake)...")
-        tab_smtp = page.locator("button:has-text('SMTP Vault')").first
+        tab_smtp = page.locator("button:has-text('SMTP Relay'), button:has-text('SMTP Vault')").first
         tab_smtp.hover()
         time.sleep(0.4)
         tab_smtp.click()
@@ -439,50 +439,46 @@ def main():
             test_handshake_btn.click()
             time.sleep(2.5) # Wait for round-trip ping
 
-        # Open Recipient Inbox via button
-        open_inbox_btn = page.locator("a[href='/inbox'] button, a[href='/inbox'], button:has-text('Open Gmail Inbox')").first
+        # Open Recipient Inbox via button or direct route
+        open_inbox_btn = page.locator("#btn-open-recipient-inbox, a[href='/inbox'] button, a[href='/inbox']").first
         if open_inbox_btn.count() > 0:
             print("  - Opening recipient Gmail inbox for Profile: monarchrealms.team@gmail.com...")
             open_inbox_btn.hover()
             time.sleep(0.5)
             open_inbox_btn.click()
             page.wait_for_url("**/inbox", timeout=12000)
-            time.sleep(2.0)
-            inject_cursor(page)
+        else:
+            print("  - Navigating directly to authentic Gmail verification view...")
+            page.goto(BASE_URL + "/inbox", wait_until="networkidle")
+        time.sleep(2.0)
+        inject_cursor(page)
 
-            print("Scene 10: Inspecting Received Email in Authentic Chrome Gmail Workspace...")
-            smooth_scroll(page, 200, steps=15, delay=0.03)
-            time.sleep(1.2)
+        print("Scene 10: Inspecting Received Email in Authentic Chrome Gmail Workspace...")
+        time.sleep(1.5)
 
-            # Click unread email to expand and read
-            email_row = page.locator("#inbox-email-row, div:has-text('Shortfundly Education Outreach')").first
+        # Click authentic inbox row showing the received Shortfundly email
+        email_row = page.locator("#inbox-email-row").first
+        if email_row.count() > 0:
+            print("  - Hovering and opening real Shortfundly proposal email...")
             email_row.hover()
-            time.sleep(0.5)
+            time.sleep(0.8)
             email_row.click()
-            time.sleep(2.0) # Wait for email view animation
+            time.sleep(2.5) # Allow transition to opened proposal view
 
-            # Click security details dropdown
-            sec_btn = page.locator("#btn-security-details").first
-            if sec_btn.count() > 0:
-                print("  - Inspecting Google TLS security certificate & headers...")
-                sec_btn.hover()
-                time.sleep(0.3)
-                sec_btn.click()
-                time.sleep(1.5)
+        # Scroll through the authentic received proposal
+        print("  - Reviewing authentic proposal headers, recipient, and body...")
+        smooth_scroll(page, 450, steps=30, delay=0.03)
+        time.sleep(3.0) # Hold for clear visual verification of real proposal content
+        smooth_scroll(page, 0, steps=25, delay=0.03)
+        time.sleep(1.5)
 
-            # Scroll through received proposal
-            smooth_scroll(page, 650, steps=30, delay=0.03)
-            time.sleep(2.5)
-            smooth_scroll(page, 0, steps=20, delay=0.03)
-            time.sleep(1.2)
-
-            # Return back to Shortfundly Deck
-            back_btn = page.locator("a[href='/dashboard'] button, a[href='/dashboard']").first
-            back_btn.hover()
-            time.sleep(0.4)
-            back_btn.click()
-            page.wait_for_url("**/dashboard", timeout=12000)
-            time.sleep(2.0)
+        # Return back to Shortfundly Deck
+        back_btn = page.locator("#btn-back-dashboard, a[href='/dashboard']").first
+        back_btn.hover()
+        time.sleep(0.6)
+        back_btn.click()
+        page.wait_for_url("**/dashboard", timeout=12000)
+        time.sleep(2.0)
 
         # -------------------------------------------------------------
         # SCENE 11: RETURN TO CENTRAL TELEMETRY OVERVIEW

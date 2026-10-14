@@ -1463,28 +1463,59 @@ textarea.input-text {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 24px;
-  padding-bottom: 18px;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
   border-bottom: 1px solid rgba(229, 231, 235, 0.6);
+  flex-wrap: nowrap;
+}
+
+.orbix-brand-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.orbix-brand-img {
+  height: 38px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.orbix-brand-tag {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 700;
+  padding-left: 10px;
+  border-left: 1.5px solid #cbd5e1;
+  line-height: 1.2;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  text-transform: uppercase;
 }
 
 .orbix-capsule-nav {
   display: inline-flex;
   align-items: center;
-  background: rgba(241, 245, 249, 0.7);
+  background: rgba(241, 245, 249, 0.85);
   backdrop-filter: blur(12px);
-  padding: 4px 6px;
+  -webkit-backdrop-filter: blur(12px);
+  padding: 3px 4px;
   border-radius: 9999px;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  gap: 4px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  gap: 2px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .orbix-capsule-btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 6px 14px;
+  gap: 6px;
+  padding: 6px 12px;
   border-radius: 9999px;
   font-size: 12px;
   font-weight: 600;
@@ -1492,44 +1523,53 @@ textarea.input-text {
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: all 0.15s ease;
 }
 
 .orbix-capsule-btn:hover {
   color: #0f172a;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .orbix-capsule-btn.active {
   background: #ffffff;
   color: #0f172a;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
   font-weight: 700;
 }
 
 .orbix-quick-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .orbix-action-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 13px;
+  gap: 5px;
+  padding: 6px 11px;
   border-radius: 9999px;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
   color: #334155;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.95);
   cursor: pointer;
-  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .orbix-action-pill:hover {
-  background: #ffffff;
+  background: #f8fafc;
   color: #0f172a;
   border-color: #cbd5e1;
 }
@@ -1797,47 +1837,103 @@ textarea.input-text {
   background: #3b82f6;
 }
 
-/* Radial Speedometer Arc Gauge */
-.orbix-speedometer-card {
-  background: rgba(255, 255, 255, 0.85);
+/* Functional Metric Telemetry (Replaces Decorative Equalizer Bars) */
+.orbix-metric-telemetry {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.orbix-mini-progress-track {
+  width: 100%;
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin: 4px 0;
+}
+
+.orbix-mini-progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.4s ease;
+}
+
+.orbix-metric-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #0f172a;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.orbix-metric-action-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.orbix-metric-action-btn.primary {
+  background: #e11d48;
+  border-color: #e11d48;
+  color: #ffffff;
+}
+
+.orbix-metric-action-btn.primary:hover {
+  background: #be123c;
+}
+
+/* Active Infrastructure & Relay Monitor (Replaces Decorative Arc) */
+.orbix-relay-monitor-card {
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.95);
   border-radius: 20px;
-  padding: 22px;
+  padding: 20px 22px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
 }
 
-.orbix-arc-wrap {
-  position: relative;
+.orbix-relay-server-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 10px 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin: 12px 0;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.orbix-arc-center-label {
-  position: absolute;
-  top: 55%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
+.orbix-relay-safeguards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 4px;
 }
 
-.orbix-arc-sub {
-  font-size: 11px;
-  color: #64748b;
-  text-transform: uppercase;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-}
-
-.orbix-arc-big {
-  font-size: 32px;
-  font-weight: 800;
-  color: #0f172a;
-  letter-spacing: -0.02em;
+.orbix-safeguard-tile {
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* Bottom Split: Forecast vs Live Stream */

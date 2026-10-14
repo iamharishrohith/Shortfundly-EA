@@ -1,0 +1,36 @@
+# Email Automation Configuration
+
+smtp:
+  host: "smtp.gmail.com"
+  port: 587
+  use_tls: true
+  use_ssl: false
+  username: "${SMTP_USERNAME}"
+  password: "${SMTP_PASSWORD}"
+  from_email: "outreach@shortfundly.com"
+  from_name: "Shortfundly Education Outreach"
+  reply_to: "support@shortfundly.com"
+
+dispatch:
+  # Safe throttling to avoid institutional spam filtering
+  min_delay_seconds: 5
+  max_delay_seconds: 15
+  batch_size: 25
+  batch_pause_seconds: 120
+  max_retries: 3
+  timeout_seconds: 30
+
+safety:
+  # In dry_run mode, emails are simulated and rendered locally without sending
+  dry_run: true
+  # In test_mode, emails are redirected to test_recipients
+  test_mode: false
+  # Domain safety: maximum emails sent to the same domain per run
+  max_emails_per_domain: 2
+
+paths:
+  master_data_excel: "data/colleges_master.xlsx"
+  master_data_csv: "data/colleges_master.csv"
+  test_recipients_csv: "data/test_recipients.csv"
+  template_config: "templates/template_config.json"
+  audit_db: "logs/dispatch_audit.db"

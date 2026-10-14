@@ -1,0 +1,14 @@
+{
+  "template_version": "2.0.0",
+  "template_name": "shortfundly_campus_collaboration_proposal",
+  "subject_template": "PROPOSAL FOR SHORTFUNDLY CAMPUS COLLABORATION - Empowering Student Creators at {{ college_name }}",
+  "html_template_file": "templates/default_invite.html",
+  "text_template_file": "templates/default_invite.txt",
+  "fallbacks": {
+    "contact_person": "Sir/Madam",
+    "department": "Office of Academic Affairs and Student Development",
+    "city": "your campus",
+    "state": "Maharashtra",
+    "sender_name": "Shortfundly Outreach Team"
+  }
+}

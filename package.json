@@ -1,0 +1,20 @@
+{
+  "name": "college-email-automation",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack --port 3000",
+    "build": "next build --webpack",
+    "start": "next start --port 3000",
+    "harvest": "node scripts/harvest_maharashtra.js"
+  },
+  "dependencies": {
+    "lucide-react": "^1.57.0",
+    "motion": "^14.2.0",
+    "next": "^16.4.0",
+    "nodemailer": "^6.10.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "xlsx": "^0.18.5"
+  }
+}

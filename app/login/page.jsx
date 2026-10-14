@@ -1,71 +1,159 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import {
-  Lock,
   Mail,
-  KeyRound,
   ArrowRight,
   Sparkles,
   AlertCircle,
   ShieldCheck,
-  ChevronLeft
+  ChevronLeft,
+  RefreshCw,
+  Lock
 } from 'lucide-react';
+
+const CHAR_SET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+
+function generateRandomCaptcha(length = 6) {
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    const idx = Math.floor(Math.random() * CHAR_SET.length);
+    result += CHAR_SET[idx];
+  }
+  return result;
+}
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('admin@shortfundly.com');
-  const [password, setPassword] = useState('shortfundly2026');
+  const [captchaCode, setCaptchaCode] = useState('');
+  const [userCaptcha, setUserCaptcha] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const canvasRef = useRef(null);
+
+  const drawCaptcha = (code) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Background fill
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const bgGrad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    bgGrad.addColorStop(0, '#f8fafc');
+    bgGrad.addColorStop(1, '#e2e8f0');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Random distortion noise lines
+    for (let i = 0; i < 5; i++) {
+      ctx.strokeStyle = ['#cbd5e1', '#94a3b8', '#cbd5e1', '#e2e8f0'][i % 4];
+      ctx.lineWidth = 1 + Math.random() * 1.5;
+      ctx.beginPath();
+      ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+      ctx.bezierCurveTo(
+        Math.random() * canvas.width, Math.random() * canvas.height,
+        Math.random() * canvas.width, Math.random() * canvas.height,
+        Math.random() * canvas.width, Math.random() * canvas.height
+      );
+      ctx.stroke();
+    }
+
+    // Random noise dots
+    for (let i = 0; i < 30; i++) {
+      ctx.fillStyle = '#94a3b8';
+      ctx.beginPath();
+      ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Draw characters with distinct rotations and contrast colors
+    const colors = ['#0f172a', '#e11d48', '#1d4ed8', '#047857', '#6d28d9', '#b45309'];
+    const charWidth = (canvas.width - 24) / code.length;
+
+    for (let i = 0; i < code.length; i++) {
+      const char = code[i];
+      ctx.save();
+      const x = 16 + i * charWidth + (Math.random() * 4 - 2);
+      const y = 28 + (Math.random() * 4 - 2);
+      const angle = (Math.random() - 0.5) * 0.45; // -12 to +12 degrees
+
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.font = 'bold 22px monospace, system-ui';
+      ctx.fillStyle = colors[i % colors.length];
+      ctx.fillText(char, -6, 0);
+      ctx.restore();
+    }
+  };
+
+  const refreshCaptcha = () => {
+    const newCode = generateRandomCaptcha(6);
+    setCaptchaCode(newCode);
+    setUserCaptcha('');
+    setTimeout(() => drawCaptcha(newCode), 20);
+  };
+
+  useEffect(() => {
+    refreshCaptcha();
+  }, []);
 
   const handleLogin = (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    setTimeout(() => {
-      if (!email.trim() || !password.trim()) {
-        setError('Please enter both operator email and access token.');
-        setIsLoading(false);
-        return;
-      }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const cleanEmail = email.trim().toLowerCase();
 
-      if (email.toLowerCase() === 'admin@shortfundly.com' && password === 'shortfundly2026') {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('sf_auth_session', JSON.stringify({
-            isAuthenticated: true,
-            email: email.trim(),
-            role: 'Lead Outreach Administrator',
-            timestamp: Date.now()
-          }));
-        }
-        router.push('/dashboard');
-      } else {
-        if (password.length >= 6) {
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('sf_auth_session', JSON.stringify({
-              isAuthenticated: true,
-              email: email.trim(),
-              role: 'Outreach Operator',
-              timestamp: Date.now()
-            }));
-          }
-          router.push('/dashboard');
-        } else {
-          setError('Invalid credentials. Use admin@shortfundly.com / shortfundly2026 or enter a 6+ char password.');
-          setIsLoading(false);
-        }
+    if (!cleanEmail) {
+      setError('Please enter your operator email address.');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!emailRegex.test(cleanEmail)) {
+      setError('Invalid email address format. Please enter a valid email (e.g. operator@shortfundly.com).');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!userCaptcha.trim()) {
+      setError('Please enter the security CAPTCHA verification code.');
+      setIsLoading(false);
+      return;
+    }
+
+    if (userCaptcha.trim().toUpperCase() !== captchaCode.toUpperCase()) {
+      setError('Incorrect CAPTCHA code. Security challenge reset. Please try again.');
+      refreshCaptcha();
+      setIsLoading(false);
+      return;
+    }
+
+    // Successful authentication
+    setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        const emailName = cleanEmail.split('@')[0];
+        const formattedName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
+        localStorage.setItem('sf_auth_session', JSON.stringify({
+          isAuthenticated: true,
+          email: cleanEmail,
+          name: formattedName.toLowerCase() === 'admin' ? 'Harish' : formattedName,
+          role: cleanEmail.includes('admin') ? 'Lead Outreach Administrator' : 'Outreach Operator',
+          timestamp: Date.now()
+        }));
       }
-    }, 300);
+      router.push('/dashboard');
+    }, 250);
   };
 
   const handleFillDemo = () => {
     setEmail('admin@shortfundly.com');
-    setPassword('shortfundly2026');
     setError('');
   };
 
@@ -82,24 +170,25 @@ export default function LoginPage() {
             <div className="brand-badge">SHORTFUNDLY</div>
           </div>
           <h2>Operator Access Portal</h2>
-          <p>Higher Education Outreach & Automation Suite</p>
+          <p>Higher Education Outreach &amp; Automation Suite</p>
         </div>
 
         <div className="demo-account-box">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: 'var(--text-title)', marginBottom: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: 'var(--text-title)', marginBottom: '4px' }}>
             <ShieldCheck size={14} style={{ color: 'var(--sf-red)' }} />
-            <span>Pre-configured Operator Credentials</span>
+            <span>Secure Operator Verification</span>
           </div>
-          <div>User: <code>admin@shortfundly.com</code></div>
-          <div style={{ marginTop: '2px' }}>Pass: <code>shortfundly2026</code></div>
+          <div style={{ fontSize: '11px', color: '#64748b' }}>
+            Passwordless single-factor email login protected by dynamic anti-bot CAPTCHA verification.
+          </div>
           <button
             type="button"
             onClick={handleFillDemo}
             className="btn btn-secondary"
-            style={{ width: '100%', marginTop: '10px', padding: '6px 12px', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            style={{ width: '100%', marginTop: '8px', padding: '5px 10px', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
           >
-            <Sparkles size={14} style={{ color: 'var(--sf-red)' }} />
-            <span>Auto-Fill Credentials</span>
+            <Sparkles size={13} style={{ color: 'var(--sf-red)' }} />
+            <span>Use Default Operator (admin@shortfundly.com)</span>
           </button>
         </div>
 
@@ -112,7 +201,10 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="form-stack">
           <div className="form-field">
-            <label>Operator Email</label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Mail size={13} />
+              <span>Operator Email</span>
+            </label>
             <div style={{ position: 'relative' }}>
               <input
                 type="email"
@@ -122,24 +214,73 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="operator@shortfundly.com"
                 style={{ paddingLeft: '34px' }}
+                autoFocus
               />
               <Mail size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             </div>
           </div>
 
-          <div className="form-field">
-            <label>Access Token / Password</label>
+          {/* CAPTCHA Security Section */}
+          <div className="form-field" style={{ marginTop: '4px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Lock size={13} />
+                <span>Security CAPTCHA Challenge</span>
+              </span>
+              <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 500 }}>Anti-Bot Protection</span>
+            </label>
+
+            {/* Canvas Badge & Refresh Row */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+              <div style={{
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                overflow: 'hidden',
+                background: '#f8fafc',
+                display: 'flex',
+                boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.05)'
+              }}>
+                <canvas
+                  ref={canvasRef}
+                  width={180}
+                  height={42}
+                  style={{ display: 'block', cursor: 'pointer' }}
+                  onClick={refreshCaptcha}
+                  title="Click to refresh CAPTCHA code"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={refreshCaptcha}
+                className="btn btn-secondary"
+                style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', whiteSpace: 'nowrap' }}
+                title="Generate new CAPTCHA code"
+              >
+                <RefreshCw size={13} />
+                <span>Refresh</span>
+              </button>
+            </div>
+
+            {/* CAPTCHA Input */}
             <div style={{ position: 'relative' }}>
               <input
-                type="password"
+                type="text"
                 className="input-text"
                 required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••••••"
-                style={{ paddingLeft: '34px' }}
+                maxLength={6}
+                value={userCaptcha}
+                onChange={(e) => setUserCaptcha(e.target.value.toUpperCase())}
+                placeholder="Enter the 6 characters shown above"
+                style={{
+                  paddingLeft: '34px',
+                  letterSpacing: '2px',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  fontFamily: 'monospace, system-ui'
+                }}
               />
-              <KeyRound size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              <ShieldCheck size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             </div>
           </div>
 
@@ -149,7 +290,7 @@ export default function LoginPage() {
             disabled={isLoading}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
-            style={{ padding: '10px 16px', marginTop: '6px' }}
+            style={{ padding: '10px 16px', marginTop: '12px' }}
           >
             <span>{isLoading ? 'Verifying Session...' : 'Authenticate & Open Dashboard'}</span>
             <ArrowRight size={14} />

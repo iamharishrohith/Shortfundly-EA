@@ -37,6 +37,9 @@ __pycache__/
 .env.development.local
 .env.test.local
 .env.production.local
+env.txt
+public/env.txt
+*env*.txt
 
 # Operating System & IDE Files
 .DS_Store

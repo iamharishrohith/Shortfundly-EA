@@ -11,6 +11,7 @@ yarn-debug.log*
 yarn-error.log*
 /tests
 outbox_preview/
+/recordings/
 __pycache__/
 *.py[cod]
 *$py.class

@@ -52,8 +52,10 @@ import {
   Settings,
   Trash2,
   Edit3,
-  Plus
+  Plus,
+  Layers
 } from 'lucide-react';
+import BatchStagingPanel from './components/BatchStagingPanel';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -1085,8 +1087,8 @@ export default function DashboardPage() {
               onClick={() => setActiveTab('1')}
               className={`orbix-capsule-btn ${activeTab === '1' ? 'active' : ''}`}
             >
-              <Upload size={13} />
-              <span>Colleges</span>
+              <Layers size={13} />
+              <span>Dataset & Batches</span>
               <span style={{
                 fontSize: '10px',
                 background: activeTab === '1' ? '#0f172a' : '#e2e8f0',
@@ -1846,215 +1848,25 @@ export default function DashboardPage() {
         </motion.div>
       )}
 
-      {/* TAB 1: UPLOAD CSV */}
+      {/* TAB 1: DATASET STAGING & AUTO BATCH ORCHESTRATOR */}
       {activeTab === '1' && (
         <motion.div
-          className="bento-grid"
           key="tab-1"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25 }}
         >
-          <div className="bento-tile col-span-12">
-            <div className="bento-tile-header">
-              <h2 className="bento-tile-title">
-                <span className="bento-tile-title-bar"></span>
-                Upload CSV Dataset &bull; Load &amp; Send
-              </h2>
-              <div>
-                <motion.button
-                  className="btn btn-secondary"
-                  onClick={handleResetToZero}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.98 }}
-                  style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '6px 12px' }}
-                  title="Clear active queue"
-                >
-                  <RotateCcw size={13} />
-                  <span>Reset / Clear Queue</span>
-                </motion.button>
-              </div>
-            </div>
-            <div className="bento-tile-body">
-              <div className="info-bar" style={{ marginBottom: '16px' }}>
-                <div>
-                  Supported Formats: <code>.csv</code>, <code>.xlsx</code>, <code>.xls</code> | Column Auto-Detection: <code>College Name</code>, <code>Official Email</code>, <code>State</code>, <code>City / District</code>, <code>Website</code>
-                </div>
-                <div>
-                  Active Working Queue: <strong>{colleges.length} colleges staged</strong> ({activeStateLabel})
-                </div>
-              </div>
-
-              {/* Upload Dropzone & Action Row */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 1.8fr) minmax(220px, 1.2fr)', gap: '16px', alignItems: 'flex-end' }}>
-                <div className="form-field">
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <FolderUp size={13} />
-                    <span>Select CSV or Excel File to Upload</span>
-                  </label>
-                  <input
-                    type="file"
-                    className="input-text"
-                    accept=".csv, .xlsx, .xls"
-                    disabled={isUploadingCsv}
-                    onChange={handleUploadCsv}
-                    style={{ padding: '8px 12px', fontSize: '13px', cursor: 'pointer' }}
-                  />
-                </div>
-
-                <div className="form-field">
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Globe size={13} />
-                    <span>Campaign / State Label (Optional)</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="input-text"
-                    placeholder="e.g. Maharashtra, Tamil Nadu, All India"
-                    value={customStateInput}
-                    onChange={(e) => setCustomStateInput(e.target.value)}
-                    style={{ padding: '8px 12px', fontSize: '13px' }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-
-          {/* Active Queue Table */}
-          <div className="bento-tile col-span-12">
-            <div className="bento-tile-header">
-              <h2 className="bento-tile-title">
-                <span className="bento-tile-title-bar"></span>
-                Active Loaded Queue ({colleges.length} Institutions)
-              </h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  <button
-                    type="button"
-                    className={`btn ${selectedCategory === 'ALL' ? 'btn-dark' : 'btn-secondary'}`}
-                    style={{ padding: '3px 9px', fontSize: '11px' }}
-                    onClick={() => setSelectedCategory('ALL')}
-                  >
-                    All Types
-                  </button>
-                  <button
-                    type="button"
-                    className={`btn ${selectedCategory === 'ENGINEERING' ? 'btn-dark' : 'btn-secondary'}`}
-                    style={{ padding: '3px 9px', fontSize: '11px' }}
-                    onClick={() => setSelectedCategory('ENGINEERING')}
-                  >
-                    Engineering &amp; Tech
-                  </button>
-                  <button
-                    type="button"
-                    className={`btn ${selectedCategory === 'MANAGEMENT' ? 'btn-dark' : 'btn-secondary'}`}
-                    style={{ padding: '3px 9px', fontSize: '11px' }}
-                    onClick={() => setSelectedCategory('MANAGEMENT')}
-                  >
-                    Management / MBA
-                  </button>
-                  <button
-                    type="button"
-                    className={`btn ${selectedCategory === 'ARTS_SCIENCE' ? 'btn-dark' : 'btn-secondary'}`}
-                    style={{ padding: '3px 9px', fontSize: '11px' }}
-                    onClick={() => setSelectedCategory('ARTS_SCIENCE')}
-                  >
-                    Arts &amp; Science
-                  </button>
-                </div>
-
-                {colleges.length > 0 && (
-                  <div style={{ position: 'relative', width: '220px' }}>
-                    <input
-                      type="text"
-                      className="input-text"
-                      placeholder="Search queue..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      style={{ paddingLeft: '32px' }}
-                    />
-                    <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="bento-tile-body no-padding">
-              {colleges.length === 0 ? (
-                <div className="empty-placeholder">
-                  Active working queue is empty (0 records). Choose your state & district above and click <strong>"Load Batch"</strong>.
-                </div>
-              ) : (
-                <div className="table-container">
-                  <table className="bento-table">
-                    <thead>
-                      <tr>
-                        <th style={{ width: '36px' }}>#</th>
-                        <th>Institution Name</th>
-                        <th>State / District</th>
-                        <th>Official Email</th>
-                        <th>Contact Person</th>
-                        <th>Department</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {colleges
-                        .filter((c) => {
-                          if (selectedCategory === 'ALL') return true;
-                          const name = (c.college_name || '').toLowerCase();
-                          const dept = (c.department || '').toLowerCase();
-                          if (selectedCategory === 'ENGINEERING') {
-                            return name.includes('eng') || name.includes('tech') || dept.includes('eng') || name.includes('polytechnic');
-                          }
-                          if (selectedCategory === 'MANAGEMENT') {
-                            return name.includes('manage') || name.includes('mba') || name.includes('bba') || dept.includes('manage');
-                          }
-                          if (selectedCategory === 'ARTS_SCIENCE') {
-                            return name.includes('art') || name.includes('sci') || name.includes('comm') || name.includes('college');
-                          }
-                          return true;
-                        })
-                        .map((c, idx) => (
-                        <tr key={c.id || idx}>
-                          <td>{idx + 1}</td>
-                          <td><strong>{c.college_name}</strong></td>
-                          <td>
-                            <span className="chip chip-idle">{c.state || 'General'} &bull; {c.city || 'Campus'}</span>
-                          </td>
-                          <td><code>{c.official_email}</code></td>
-                          <td>{c.contact_person || 'N/A'}</td>
-                          <td style={{ color: 'var(--text-muted)' }}>{c.department || 'N/A'}</td>
-                          <td>
-                            <div style={{ display: 'flex', gap: '6px' }}>
-                              <button
-                                className="btn btn-secondary"
-                                style={{ padding: '3px 8px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                                onClick={() => {
-                                  setSingleRecipient(c);
-                                  setActiveTab('3');
-                                  setSenderMode('individual');
-                                }}
-                              >
-                                <Send size={11} style={{ color: 'var(--sf-red)' }} />
-                                <span>Test Send</span>
-                              </button>
-                              {c.website_url && (
-                                <a href={c.website_url} target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ padding: '3px 8px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                  <span>Portal</span>
-                                  <ExternalLink size={10} />
-                                </a>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </div>
+          <BatchStagingPanel
+            onQueueUpdated={fetchColleges}
+            fileInputRef={fileInputRef}
+            handleUploadCsv={handleUploadCsv}
+            isUploadingCsv={isUploadingCsv}
+            customStateInput={customStateInput}
+            setCustomStateInput={setCustomStateInput}
+            handleResetToZero={handleResetToZero}
+            collegesCount={colleges.length}
+            activeStateLabel={activeStateLabel}
+          />
         </motion.div>
       )}
 
